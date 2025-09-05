@@ -1,6 +1,10 @@
 # 飞书文档创建器 Chrome 插件
 
-一键创建飞书文档的 Chrome 浏览器插件，基于飞书开放平台 API 开发。
+> 一键创建飞书文档的 Chrome 浏览器插件，基于飞书开放平台 API 开发。
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://developer.chrome.com/docs/extensions/)
+[![Feishu API](https://img.shields.io/badge/Feishu-API-green.svg)](https://open.feishu.cn/)
 
 ## 功能特性
 
@@ -87,8 +91,42 @@ open_feishu/
 
 ## 开发说明
 
-基于 [feishu-doc-creator](https://github.com/ChrisZou/feishu-doc-creator) 项目改造，将命令行工具转换为Chrome插件实现。
+### 技术栈
+- **Chrome Extension Manifest V3** - 现代Chrome插件标准
+- **飞书开放平台API v2** - 官方API集成
+- **原生JavaScript** - 无第三方依赖，轻量高效
+
+### 参考项目
+基于 [feishu-doc-creator](https://github.com/ChrisZou/feishu-doc-creator) 项目改造，将Go命令行工具转换为Chrome插件实现。
+
+## 贡献指南
+
+1. Fork 本项目
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建 Pull Request
+
+## 问题反馈
+
+如遇到问题，请提交 [Issue](../../issues) 或者通过以下方式联系：
+- 描述具体的错误信息
+- 提供插件版本信息
+- 附上控制台错误日志（如有）
+
+## 更新日志
+
+### v1.0.0 (2024-09-05)
+- ✨ 初始版本发布
+- 🚀 一键创建飞书文档功能
+- ⚙️ 配置管理界面
+- 🔐 安全的密钥存储
+- 👥 自动权限设置
 
 ## 许可证
 
-MIT License
+本项目采用 [MIT License](LICENSE) 开源协议。
+
+---
+
+**📝 Generated with [Claude Code](https://claude.ai/code)**
