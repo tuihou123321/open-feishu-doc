@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "飞书文档创建器",
+  "version": "1.0.0",
+  "description": "一键创建飞书文档的Chrome插件",
+  
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  
+  "host_permissions": [
+    "https://open.feishu.cn/*"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "创建飞书文档",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+  
+  "options_page": "options.html",
+  
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

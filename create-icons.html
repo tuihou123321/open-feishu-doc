@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>生成插件图标</title>
+</head>
+<body>
+    <canvas id="canvas" width="128" height="128" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <button onclick="generateIcons()">生成图标</button>
+    
+    <script>
+        function generateIcons() {
+            const sizes = [16, 32, 48, 128];
+            
+            sizes.forEach(size => {
+                const canvas = document.createElement('canvas');
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                
+                // 绘制背景
+                ctx.fillStyle = '#3370ff';
+                ctx.fillRect(0, 0, size, size);
+                
+                // 绘制圆角
+                const radius = size * 0.15;
+                ctx.clearRect(0, 0, size, size);
+                ctx.fillStyle = '#3370ff';
+                ctx.beginPath();
+                ctx.roundRect(0, 0, size, size, radius);
+                ctx.fill();
+                
+                // 绘制飞书图标样式的"文"字
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${size * 0.5}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('文', size/2, size/2);
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                link.download = `icon-${size}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+            
+            alert('图标文件已生成并下载，请将它们放置在 icons/ 文件夹中');
+        }
+        
+        // 在页面canvas上预览图标
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 预览128px图标
+        ctx.fillStyle = '#3370ff';
+        ctx.beginPath();
+        ctx.roundRect(0, 0, 128, 128, 20);
+        ctx.fill();
+        
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 64px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('文', 64, 64);
+    </script>
+</body>
+</html>
