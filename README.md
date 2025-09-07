@@ -107,6 +107,11 @@ open_feishu/
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 创建 Pull Request
 
+## 作者信息
+
+**作者**: 佐老板  
+**微信**: xiaozuo-2013
+
 ## 问题反馈
 
 如遇到问题，请提交 [Issue](../../issues) 或者通过以下方式联系：
