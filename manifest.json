@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "飞书文档创建器",
+  "name": "佐老板飞书文档创建器",
   "version": "1.0.0",
   "description": "一键创建飞书文档的Chrome插件",
   "author": "佐老板 (微信: xiaozuo-2013)",
