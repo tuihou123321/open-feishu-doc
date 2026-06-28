@@ -5,6 +5,7 @@ class FeishuAPI {
     this.baseUrl = 'https://open.feishu.cn/open-apis';
     this.accessToken = null;
     this.tokenExpiry = null;
+    this.defaultAdminOpenId = 'ou_49f1acb233b076bb716da1e924e945d2';
   }
 
   async getAccessToken() {
@@ -81,9 +82,13 @@ class FeishuAPI {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        external_access: false,
-        link_share_entity: "tenant_editable",
-        share_entity: "anyone"
+        // Allow the owner to manually share externally later, but keep link sharing off by default.
+        external_access: true,
+        invite_external: true,
+        link_share_entity: "closed",
+        share_entity: "only_full_access",
+        security_entity: "anyone_can_view",
+        comment_entity: "anyone_can_view"
       })
     });
 
@@ -129,7 +134,7 @@ class FeishuAPI {
     }
 
     const user = userList[0];
-    return user.user_id || user.open_id || user.union_id || null;
+    return user.open_id || user.user_id || user.union_id || null;
   }
 
   async addDocumentManager(documentId, userId) {
@@ -147,7 +152,6 @@ class FeishuAPI {
         member_type: "openid",
         member_id: userId,
         perm: "full_access",
-        perm_type: "container",
         type: "user"
       })
     });
@@ -162,6 +166,39 @@ class FeishuAPI {
     return data.data;
   }
 
+  async transferDocumentOwner(documentId, userId) {
+    if (!userId) return null;
+
+    const token = await this.getAccessToken();
+    const params = new URLSearchParams({
+      type: 'docx',
+      need_notification: 'false',
+      remove_old_owner: 'false',
+      stay_put: 'false',
+      old_owner_perm: 'full_access'
+    });
+
+    const response = await fetch(`${this.baseUrl}/drive/v1/permissions/${documentId}/members/transfer_owner?${params.toString()}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        member_type: 'openid',
+        member_id: userId
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.code !== 0) {
+      throw new Error(`转移文档所有者失败: ${data.msg || data.message}`);
+    }
+
+    return data.data || {};
+  }
+
   async testConnection() {
     try {
       const token = await this.getAccessToken();
@@ -172,34 +209,64 @@ class FeishuAPI {
   }
 
   async createDocumentWithSettings(title, adminMobile = null) {
+    const warnings = [];
+    let ownerTransferred = false;
+    let adminGranted = false;
+    let shareEnabled = false;
+
     try {
       // 1. 创建文档（核心功能）
       const docResult = await this.createDocument(title);
       
-      // 2. 尝试设置公开权限（可选功能，失败不影响文档创建）
-      try {
-        await this.setDocumentPermission(docResult.documentId);
-      } catch (error) {
-        console.warn('设置权限失败，但文档已创建:', error.message);
-      }
-      
-      // 3. 尝试添加管理员（可选功能，失败不影响文档创建）
+      // 2. 尝试把佐老板设为所有者。失败时降级为 full_access 管理员。
+      let userId = this.defaultAdminOpenId;
       if (adminMobile) {
         try {
-          const userId = await this.findUserByMobile(adminMobile);
-          if (userId) {
-            await this.addDocumentManager(docResult.documentId, userId);
-          }
+          userId = await this.findUserByMobile(adminMobile) || this.defaultAdminOpenId;
         } catch (error) {
-          console.warn('添加管理员失败，但文档已创建:', error.message);
+          console.warn('通过手机号查找管理员失败，使用默认管理员:', error.message);
+          warnings.push(error.message);
         }
+      }
+
+      if (userId) {
+        try {
+          await this.transferDocumentOwner(docResult.documentId, userId);
+          ownerTransferred = true;
+        } catch (error) {
+          console.warn('转移所有者失败，尝试添加为管理员:', error.message);
+          warnings.push(error.message);
+
+          try {
+            await this.addDocumentManager(docResult.documentId, userId);
+            adminGranted = true;
+          } catch (fallbackError) {
+            console.warn('添加管理员失败，但文档已创建:', fallbackError.message);
+            warnings.push(fallbackError.message);
+          }
+        }
+      }
+
+      // 3. 尝试开启分享权限（可选功能，失败不影响文档创建）
+      try {
+        await this.setDocumentPermission(docResult.documentId);
+        shareEnabled = true;
+      } catch (error) {
+        console.warn('设置分享权限失败，但文档已创建:', error.message);
+        warnings.push(error.message);
       }
       
       return {
         success: true,
         documentId: docResult.documentId,
         url: docResult.url,
-        message: '文档创建成功！'
+        ownerTransferred,
+        adminGranted,
+        shareEnabled,
+        warnings,
+        message: ownerTransferred
+          ? '文档创建成功，已转移所有者；默认不公开，可手动开启对外分享！'
+          : '文档创建成功，已尽量设置管理员；默认不公开，可手动开启对外分享！'
       };
     } catch (error) {
       return {

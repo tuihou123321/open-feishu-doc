@@ -137,9 +137,11 @@
         <li>在应用管理页面获取 App ID 和 App Secret</li>
         <li>在权限管理中添加以下权限：
           <ul>
-            <li>docs:doc:write (创建文档)</li>
-            <li>drive:drive:write (设置权限)</li>
-            <li>contact:contact:read (查找用户)</li>
+            <li>docx:document:create (创建新版文档)</li>
+            <li>docs:permission.setting:write_only (允许手动对外分享，默认不公开链接)</li>
+            <li>docs:permission.member:create (添加文档管理员)</li>
+            <li>docs:permission.member:transfer (转移文档所有者)</li>
+            <li>contact:user.base:readonly / contact:user:search (通过手机号查找用户)</li>
           </ul>
         </li>
         <li>填写下方配置信息并保存</li>
@@ -162,7 +164,7 @@
       <div class="form-group">
         <label for="adminMobile">管理员手机号 (可选)</label>
         <input type="text" id="adminMobile">
-        <div class="help-text">创建文档后自动添加为管理员的手机号</div>
+        <div class="help-text">不填时默认把文档所有者转给佐老板；填写后会优先按手机号查找管理员</div>
       </div>
       
       <button type="submit" class="save-btn">保存配置</button>

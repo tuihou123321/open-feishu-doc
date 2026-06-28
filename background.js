@@ -5,6 +5,14 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log('飞书文档创建器插件已安装');
 });
 
+let shortcutCreating = false;
+
+chrome.commands.onCommand.addListener((command) => {
+  if (command === 'create-document') {
+    createDocumentFromShortcut();
+  }
+});
+
 // 处理来自popup的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'createDocument') {
@@ -21,6 +29,66 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 });
+
+async function createDocumentFromShortcut() {
+  if (shortcutCreating) {
+    console.log('快捷键创建文档正在进行中，忽略重复触发');
+    return;
+  }
+
+  shortcutCreating = true;
+  await setActionBadge('...', '#3370ff');
+
+  try {
+    const result = await chrome.storage.sync.get(['feishu_config']);
+    const config = result.feishu_config || {};
+
+    if (!config.appId || !config.appSecret) {
+      await setActionBadge('CFG', '#fa8c16');
+      await chrome.runtime.openOptionsPage();
+      return;
+    }
+
+    const response = await handleCreateDocument({
+      appId: config.appId,
+      appSecret: config.appSecret,
+      adminMobile: config.adminMobile,
+      title: generateDocumentTitle()
+    });
+
+    if (response.success && response.url) {
+      await chrome.tabs.create({ url: response.url });
+      await setActionBadge('OK', '#52c41a');
+      await chrome.action.setTitle({ title: response.message || '文档创建成功' });
+      return;
+    }
+
+    const errorMsg = response.message || '文档创建失败';
+    console.error('快捷键创建文档失败:', response);
+    await setActionBadge('ERR', '#ff4d4f');
+    await chrome.action.setTitle({ title: errorMsg });
+  } catch (error) {
+    console.error('快捷键创建文档异常:', error);
+    await setActionBadge('ERR', '#ff4d4f');
+    await chrome.action.setTitle({ title: error.message });
+  } finally {
+    shortcutCreating = false;
+    setTimeout(() => {
+      chrome.action.setBadgeText({ text: '' });
+      chrome.action.setTitle({ title: '创建飞书文档' });
+    }, 3000);
+  }
+}
+
+function generateDocumentTitle() {
+  const now = new Date();
+  return `新建文档_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+}
+
+async function setActionBadge(text, color) {
+  await chrome.action.setBadgeText({ text });
+  await chrome.action.setBadgeBackgroundColor({ color });
+}
 
 async function handleCreateDocument(data) {
   const { appId, appSecret, adminMobile, title } = data;
