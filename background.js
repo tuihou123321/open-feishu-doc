@@ -3,6 +3,11 @@ importScripts('feishu-api.js');
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log('飞书文档创建器插件已安装');
+  checkShortcutBinding();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  checkShortcutBinding();
 });
 
 let shortcutCreating = false;
@@ -88,6 +93,28 @@ function generateDocumentTitle() {
 async function setActionBadge(text, color) {
   await chrome.action.setBadgeText({ text });
   await chrome.action.setBadgeBackgroundColor({ color });
+}
+
+async function checkShortcutBinding() {
+  try {
+    const commands = await chrome.commands.getAll();
+    const createCommand = commands.find(command => command.name === 'create-document');
+
+    if (!createCommand?.shortcut) {
+      await setActionBadge('KEY', '#fa8c16');
+      await chrome.action.setTitle({
+        title: '请到 chrome://extensions/shortcuts 设置创建文档快捷键'
+      });
+      return;
+    }
+
+    await chrome.action.setBadgeText({ text: '' });
+    await chrome.action.setTitle({
+      title: `创建飞书文档 (${createCommand.shortcut})`
+    });
+  } catch (error) {
+    console.warn('检查快捷键绑定失败:', error);
+  }
 }
 
 async function handleCreateDocument(data) {

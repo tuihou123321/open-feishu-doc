@@ -9,7 +9,7 @@
 ## 功能特性
 
 - 🚀 一键创建并打开飞书文档
-- ⌨️ 支持快捷键创建：macOS 默认 `Command+Shift+Y`
+- ⌨️ 支持快捷键创建：macOS 默认 `Option+Shift+Y`
 - 👑 自动转移文档所有者给佐老板
 - 🔒 默认不公开链接，需要时手动开启对外分享
 - 👥 所有者转移失败时，自动降级添加管理员权限
@@ -60,9 +60,10 @@
 
 按下快捷键后，插件会直接创建并打开文档，不需要再打开 popup。
 
-- macOS：`Command+Shift+Y`
-- Windows / Linux：`Ctrl+Shift+Y`
+- macOS：`Option+Shift+Y`
+- Windows / Linux：`Alt+Shift+Y`
 - 如需修改快捷键，打开 `chrome://extensions/shortcuts`，找到"佐老板飞书文档创建器"后重新设置。
+- 快捷键默认只在 Chrome 获得焦点时生效；如果插件图标显示 `KEY`，说明快捷键未绑定或冲突，需要到快捷键页面手动设置。
 
 ## 权限行为
 
@@ -154,6 +155,11 @@ open_feishu/
 - 附上控制台错误日志（如有）
 
 ## 更新日志
+
+### v1.1.1
+- ⌨️ macOS 默认快捷键改为 `Option+Shift+Y`，减少和系统 / Chrome 快捷键冲突
+- 🧭 新增快捷键绑定检测：未绑定时插件图标显示 `KEY`
+- 📝 补充快捷键只在 Chrome 聚焦时生效的说明
 
 ### v1.1.0
 - ✨ 新增快捷键创建文档
